@@ -15,7 +15,10 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "checkmydns.app.codeforgex.studio"
+      "bundleIdentifier": "checkmydns.app.codeforgex.studio",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -39,6 +42,14 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": "https://checkmydns.online/"
+      },
+      "eas": {
+        "projectId": "bf9cf0ee-4f7a-4f9d-a577-5ec7864651b0"
+      }
     }
   }
 }
