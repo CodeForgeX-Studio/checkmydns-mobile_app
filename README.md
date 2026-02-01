@@ -54,6 +54,20 @@ npx expo start
 
 The **Expo Go** app is required on your mobile device to preview and test the project in real time.
 
+## Network Requirements
+
+The **Check My DNS Mobile App** requires an active internet connection to function correctly.  
+Without any network connectivity (for example, when all network connections are disabled), the app cannot perform DNS lookups against the public API and therefore will not work.
+
+The app **does work** when you are connected via:
+- 3G / 4G / 5G mobile data  
+- Someone else's mobile hotspot  
+- A public network (for example at schools, cafés, or train stations)  
+- Your own home network (Wi‑Fi or wired)
+
+It does **not matter** if you are using a VPN on top of these connections.  
+At this moment, VPN usage is **not blocked**, because VPNs exist to protect your privacy and security, and we want to keep it that way.
+
 ## Future Plans
 
 - Continued optimization of the DNS testing engine through the shared API.  
