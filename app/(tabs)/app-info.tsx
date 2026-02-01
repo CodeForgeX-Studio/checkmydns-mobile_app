@@ -37,7 +37,7 @@ export default function MoreScreen() {
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-          <Text style={styles.title}>More</Text>
+          <Text style={styles.title}>About the app</Text>
           <Text style={styles.subtitle}>
             Access pricing, documentation, and learn more about Check My DNS
           </Text>
@@ -103,7 +103,7 @@ export default function MoreScreen() {
               <Code size={48} color={Colors.primary} />
             </View>
             <Text style={styles.appName}>Check My DNS</Text>
-            <Text style={styles.appVersion}>Version 1.0.0</Text>
+            <Text style={styles.appVersion}>Version 1.0.1</Text>
             <Text style={styles.aboutDescription}>
               Professional DNS lookup and email security validation tool. Check DNS
               records globally, validate email configuration, run comprehensive security
