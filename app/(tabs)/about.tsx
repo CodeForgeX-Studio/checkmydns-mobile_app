@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,8 @@ import {
   ScrollView,
   StyleSheet,
   Linking,
+  Alert,
+  Modal,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
@@ -17,21 +19,90 @@ import {
 } from "lucide-react-native";
 import Colors from "@/constants/colors";
 
+type PendingLinkState = {
+  url: string | null;
+  domain: string | null;
+};
+
 export default function MoreScreen() {
   const insets = useSafeAreaInsets();
+  const [trustedDomains, setTrustedDomains] = useState<string[]>([]);
+  const [pendingLink, setPendingLink] = useState<PendingLinkState>({
+    url: null,
+    domain: null,
+  });
+  const [modalVisible, setModalVisible] = useState(false);
+  const [trustDomainChecked, setTrustDomainChecked] = useState(false);
 
-  const openURL = async (url: string) => {
+  const extractDomain = (url: string): string | null => {
+    try {
+      const hostname = new URL(url).hostname;
+      return hostname;
+    } catch {
+      return null;
+    }
+  };
+
+  const isDomainTrusted = (domain: string | null): boolean => {
+    if (!domain) return false;
+    return trustedDomains.includes(domain);
+  };
+
+  const handleOpenLinkConfirmed = async (url: string) => {
     try {
       const supported = await Linking.canOpenURL(url);
       if (supported) {
         await Linking.openURL(url);
       } else {
-        alert(`Cannot open URL: ${url}`);
+        Alert.alert("Error", `Cannot open URL: ${url}`);
       }
     } catch {
-      alert("Failed to open URL");
+      Alert.alert("Error", "Failed to open URL");
     }
   };
+
+  const openURL = async (url: string) => {
+    const domain = extractDomain(url);
+
+    if (isDomainTrusted(domain)) {
+      await handleOpenLinkConfirmed(url);
+      return;
+    }
+
+    setPendingLink({ url, domain });
+    setTrustDomainChecked(false);
+    setModalVisible(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalVisible(false);
+    setPendingLink({ url: null, domain: null });
+    setTrustDomainChecked(false);
+  };
+
+  const handleConfirmOpen = async () => {
+    if (!pendingLink.url) {
+      handleCloseModal();
+      return;
+    }
+
+    const urlToOpen = pendingLink.url;
+    const domainToTrust = pendingLink.domain;
+
+    if (trustDomainChecked && domainToTrust) {
+      setTrustedDomains((prev) =>
+        prev.includes(domainToTrust) ? prev : [...prev, domainToTrust]
+      );
+    }
+
+    handleCloseModal();
+    await handleOpenLinkConfirmed(urlToOpen);
+  };
+
+  const displayDomain = useMemo(() => {
+    if (!pendingLink.domain) return "";
+    return pendingLink.domain;
+  }, [pendingLink.domain]);
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -125,7 +196,7 @@ export default function MoreScreen() {
             </View>
             <Text style={styles.brandDescription}>
               Check My DNS is built, owned, and maintained by CodeForgeX Studio, a
-              developer‑focused studio specialising in network tooling and security‑oriented
+              developer-focused studio specialising in network tooling and security-oriented
               utilities.
             </Text>
             <TouchableOpacity
@@ -145,6 +216,54 @@ export default function MoreScreen() {
           <Text style={styles.footerText}>All rights reserved.</Text>
         </View>
       </ScrollView>
+
+      <Modal
+        visible={modalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={handleCloseModal}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalHeaderRow}>
+              <Text style={styles.modalTitle}>Open external link</Text>
+              <TouchableOpacity onPress={handleCloseModal} style={styles.closeIconButton}>
+                <Text style={styles.closeIconText}>×</Text>
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.modalMessage}>
+              This will open the following link in your browser:
+            </Text>
+            <Text style={styles.modalUrl}>{pendingLink.url}</Text>
+
+            <TouchableOpacity
+              style={styles.checkboxRow}
+              onPress={() => setTrustDomainChecked((prev) => !prev)}
+              activeOpacity={0.7}
+            >
+              <View
+                style={[
+                  styles.checkboxBox,
+                  trustDomainChecked && styles.checkboxBoxChecked,
+                ]}
+              >
+                {trustDomainChecked && <Text style={styles.checkboxCheckmark}>✓</Text>}
+              </View>
+              <Text style={styles.checkboxLabel}>
+                Trust links from {displayDomain || "this domain"} for this session
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.modalButtonPrimary}
+              onPress={handleConfirmOpen}
+            >
+              <Text style={styles.modalButtonPrimaryText}>Open link</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -295,5 +414,95 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: Colors.textMuted,
     marginBottom: 2,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 24,
+  },
+  modalContainer: {
+    width: "100%",
+    borderRadius: 12,
+    padding: 20,
+    backgroundColor: Colors.cardBg,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  modalHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "700" as const,
+    color: Colors.text,
+  },
+  closeIconButton: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  closeIconText: {
+    fontSize: 22,
+    color: Colors.textSecondary,
+    marginTop: -2,
+  },
+  modalMessage: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    marginBottom: 8,
+  },
+  modalUrl: {
+    fontSize: 13,
+    color: Colors.text,
+    marginBottom: 16,
+  },
+  modalButtonPrimary: {
+    marginTop: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: Colors.primary,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalButtonPrimaryText: {
+    fontSize: 14,
+    color: "#fff",
+    fontWeight: "600" as const,
+  },
+  checkboxRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 8,
+  },
+  checkboxBox: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 8,
+    backgroundColor: Colors.cardBg,
+  },
+  checkboxBoxChecked: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  checkboxCheckmark: {
+    color: "#fff",
+    fontSize: 14,
+  },
+  checkboxLabel: {
+    fontSize: 13,
+    color: Colors.textSecondary,
+    flex: 1,
   },
 });

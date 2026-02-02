@@ -244,7 +244,7 @@ export default function TabLayout() {
       />
       
       <Tabs.Screen
-        name="Security"
+        name="security"
         options={{
           href: null,
           title: "Security",
