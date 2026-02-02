@@ -49,7 +49,9 @@ To run the app locally:
 npm install
 
 # Run in development mode
-npx expo start
+npm run start
+# or for web only
+npm run start-web
 ```
 
 The **Expo Go** app is required on your mobile device to preview and test the project in real time.
@@ -70,11 +72,8 @@ At this moment, VPN usage is **not blocked**, because VPNs exist to protect your
 
 ## Future Plans
 
-- Continued optimization of the DNS testing engine through the shared API.  
-- Potential integration of push notifications for network status alerts.  
-- Improved offline support and caching.  
+- Continued optimization of the DNS testing engine through the shared API.
 - UI/UX refinement to enhance the mobile experience.  
-- Possible synchronization features between the mobile app and the web dashboard.  
 
 ## Project Links
 
