@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,30 +8,65 @@ import {
   StyleSheet,
   ActivityIndicator,
   Platform,
-} from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useMutation } from '@tanstack/react-query';
-import { useIsFocused } from '@react-navigation/native';
-import Colors from '@/constants/colors';
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useMutation } from "@tanstack/react-query";
+import { useIsFocused } from "@react-navigation/native";
+import Colors from "@/constants/colors";
 
 const RECORD_TYPES = [
-  { label: 'A - IPv4 Address', value: 'A' },
-  { label: 'AAAA - IPv6 Address', value: 'AAAA' },
-  { label: 'MX - Mail Exchange', value: 'MX' },
-  { label: 'NS - Name Server', value: 'NS' },
-  { label: 'TXT - Text Record', value: 'TXT' },
-  { label: 'CNAME - Canonical Name', value: 'CNAME' },
-  { label: 'SOA - Start of Authority', value: 'SOA' },
-  { label: 'PTR - Pointer Record', value: 'PTR' },
-  { label: 'SRV - Service Record', value: 'SRV' },
-  { label: 'CAA - Certificate Authority', value: 'CAA' },
+  { label: "A - IPv4 Address", value: "A" },
+  { label: "AAAA - IPv6 Address", value: "AAAA" },
+  { label: "MX - Mail Exchange", value: "MX" },
+  { label: "NS - Name Server", value: "NS" },
+  { label: "TXT - Text Record", value: "TXT" },
+  { label: "CNAME - Canonical Name", value: "CNAME" },
+  { label: "SOA - Start of Authority", value: "SOA" },
+  { label: "PTR - Pointer Record", value: "PTR" },
+  { label: "SRV - Service Record", value: "SRV" },
+  { label: "CAA - Certificate Authority", value: "CAA" },
+  { label: "NAPTR - Name Authority Pointer", value: "NAPTR" },
+  { label: "DS - Delegation Signer", value: "DS" },
+  { label: "DNSKEY - DNS Public Key", value: "DNSKEY" },
 ];
+
+interface DNSRecord {
+  type?: string;
+  host?: string;
+  ip?: string;
+  ipv6?: string;
+  target?: string;
+  priority?: number;
+  ns_server?: string;
+  txt?: string;
+  cname?: string;
+  primary_name_server?: string;
+  hostmaster?: string;
+  ptr?: string;
+  port?: number;
+  flags?: number | string;
+  tag?: string;
+  value?: string;
+  order?: number;
+  preference?: number;
+  service?: string;
+  regexp?: string;
+  replacement?: string;
+  key_tag?: string;
+  algorithm?: string;
+  digest_type?: string;
+  digest?: string;
+  protocol?: string;
+  public_key?: string;
+  message?: string;
+  error?: string;
+}
 
 interface DNSResult {
   location: string;
   ip: string;
   provider: string;
-  dns_results: any[];
+  dns_results: DNSRecord[];
   resolved: boolean;
 }
 
@@ -39,36 +74,36 @@ export default function DNSCheckerScreen() {
   const insets = useSafeAreaInsets();
   const isFocused = useIsFocused();
   const [hasEverFocused, setHasEverFocused] = useState(false);
-  const [domain, setDomain] = useState('');
-  const [recordType, setRecordType] = useState('A');
+  const [domain, setDomain] = useState("");
+  const [recordType, setRecordType] = useState("A");
   const [showTypePicker, setShowTypePicker] = useState(false);
   const [results, setResults] = useState<DNSResult[]>([]);
 
   const checkDNS = useMutation({
     mutationFn: async () => {
       const formData = new FormData();
-      formData.append('domain', domain);
-      formData.append('recordType', recordType);
+      formData.append("domain", domain);
+      formData.append("recordType", recordType);
 
-      const response = await fetch('https://checkmydns.online/api/dns-check', {
-        method: 'POST',
+      const response = await fetch("https://checkmydns.online/api/dns-check", {
+        method: "POST",
         body: formData,
       });
 
       if (!response.ok) {
-        throw new Error('Failed to check DNS records');
+        throw new Error("Failed to check DNS records");
       }
 
       return response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: (data: DNSResult[]) => {
       setResults(data);
     },
   });
 
   const handleCheck = () => {
     if (!domain.trim()) {
-      alert('Please enter a domain name');
+      alert("Please enter a domain name");
       return;
     }
     setResults([]);
@@ -77,8 +112,8 @@ export default function DNSCheckerScreen() {
 
   useEffect(() => {
     if (isFocused && hasEverFocused) {
-      setDomain('');
-      setRecordType('A');
+      setDomain("");
+      setRecordType("A");
       setShowTypePicker(false);
       setResults([]);
       checkDNS.reset();
@@ -93,11 +128,13 @@ export default function DNSCheckerScreen() {
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
           <Text style={styles.title}>DNS Checker</Text>
-          <Text style={styles.subtitle}>Check DNS records globally from multiple servers</Text>
+          <Text style={styles.subtitle}>
+            Check DNS records globally from multiple servers
+          </Text>
         </View>
 
         <View style={styles.card}>
-          <View style={styles.formGroup}>
+          <View className="form-group" style={styles.formGroup}>
             <Text style={styles.label}>Domain Name</Text>
             <TextInput
               style={styles.input}
@@ -181,7 +218,7 @@ export default function DNSCheckerScreen() {
                     ]}
                   >
                     <Text style={styles.statusText}>
-                      {result.resolved ? 'Resolved' : 'Failed'}
+                      {result.resolved ? "Resolved" : "Failed"}
                     </Text>
                   </View>
                 </View>
@@ -232,7 +269,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
-    fontWeight: '800' as const,
+    fontWeight: "800" as const,
     color: Colors.text,
     marginBottom: 8,
   },
@@ -254,7 +291,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    fontWeight: '600' as const,
+    fontWeight: "600" as const,
     color: Colors.text,
     marginBottom: 8,
   },
@@ -284,7 +321,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
     borderRadius: 8,
     marginTop: 8,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   pickerOption: {
     padding: 12,
@@ -292,7 +329,7 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.border,
   },
   pickerOptionSelected: {
-    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+    backgroundColor: "rgba(59, 130, 246, 0.1)",
   },
   pickerOptionText: {
     fontSize: 14,
@@ -300,28 +337,28 @@ const styles = StyleSheet.create({
   },
   pickerOptionTextSelected: {
     color: Colors.primary,
-    fontWeight: '600' as const,
+    fontWeight: "600" as const,
   },
   button: {
     backgroundColor: Colors.primary,
     borderRadius: 8,
     padding: 16,
-    alignItems: 'center',
+    alignItems: "center",
   },
   buttonDisabled: {
     opacity: 0.6,
   },
   buttonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: '600' as const,
+    fontWeight: "600" as const,
   },
   resultsSection: {
     marginBottom: 20,
   },
   resultsTitle: {
     fontSize: 24,
-    fontWeight: '700' as const,
+    fontWeight: "700" as const,
     color: Colors.text,
     marginBottom: 16,
   },
@@ -334,9 +371,9 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   resultHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
     marginBottom: 12,
   },
   resultInfo: {
@@ -344,7 +381,7 @@ const styles = StyleSheet.create({
   },
   resultLocation: {
     fontSize: 16,
-    fontWeight: '600' as const,
+    fontWeight: "600" as const,
     color: Colors.text,
     marginBottom: 4,
   },
@@ -368,7 +405,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 12,
-    fontWeight: '600' as const,
+    fontWeight: "600" as const,
     color: Colors.text,
   },
   recordItem: {
@@ -382,7 +419,7 @@ const styles = StyleSheet.create({
   recordText: {
     fontSize: 13,
     color: Colors.text,
-    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+    fontFamily: Platform.OS === "ios" ? "Courier" : "monospace",
   },
   errorCard: {
     backgroundColor: Colors.errorBg,

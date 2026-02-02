@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,62 +8,65 @@ import {
   StyleSheet,
   ActivityIndicator,
   Platform,
-} from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useMutation } from '@tanstack/react-query';
-import { useIsFocused } from '@react-navigation/native';
-import { CheckCircle, XCircle, AlertTriangle } from 'lucide-react-native';
-import Colors from '@/constants/colors';
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useMutation } from "@tanstack/react-query";
+import { useIsFocused } from "@react-navigation/native";
+import { CheckCircle, XCircle, AlertTriangle } from "lucide-react-native";
+import Colors from "@/constants/colors";
 
 const MODE_OPTIONS = [
-  { label: 'Auto detect (IP or Domain)', value: 'auto' },
-  { label: 'Force IP check', value: 'ip' },
-  { label: 'Force domain check', value: 'domain' },
+  { label: "Auto detect (IP or Domain)", value: "auto" },
+  { label: "Force IP check", value: "ip" },
+  { label: "Force domain check", value: "domain" },
 ];
 
+interface SpamListResult {
+  name: string;
+  host: string;
+  listed: boolean;
+  response?: string | null;
+  reason?: string | null;
+  list_url?: string | null;
+}
+
 interface SpamCheckResult {
-  checked_value: string;
+  checked_value: string | null;
   type: string;
-  ip: string;
-  domain: string;
+  ip: string | null;
+  domain: string | null;
   total_lists: number;
   listed_count: number;
-  results: {
-    name: string;
-    host: string;
-    listed: boolean;
-    response?: string;
-    reason?: string;
-    list_url?: string;
-  }[];
+  results: SpamListResult[];
 }
 
 export default function SpamCheckerScreen() {
   const insets = useSafeAreaInsets();
   const isFocused = useIsFocused();
   const [hasEverFocused, setHasEverFocused] = useState(false);
-  const [target, setTarget] = useState('');
-  const [mode, setMode] = useState('auto');
+  const [target, setTarget] = useState("");
+  const [mode, setMode] = useState<"auto" | "ip" | "domain">("auto");
   const [showModePicker, setShowModePicker] = useState(false);
   const [result, setResult] = useState<SpamCheckResult | null>(null);
 
   const checkSpam = useMutation({
     mutationFn: async () => {
       const formData = new FormData();
-      formData.append('target', target);
-      formData.append('mode', mode);
+      formData.append("target", target);
+      formData.append("mode", mode);
 
-      const response = await fetch('https://checkmydns.online/api/spam-check', {
-        method: 'POST',
+      const response = await fetch("https://checkmydns.online/api/spam-check", {
+        method: "POST",
         body: formData,
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Unknown error during spam check');
+        throw new Error(data.error || "Unknown error during spam check.");
       }
 
-      return response.json();
+      return data as SpamCheckResult;
     },
     onSuccess: (data) => {
       setResult(data);
@@ -72,29 +75,48 @@ export default function SpamCheckerScreen() {
 
   const handleCheck = () => {
     if (!target.trim()) {
-      alert('Please enter an IP address or domain');
+      alert("Please enter an IP address or domain");
       return;
     }
     setResult(null);
     checkSpam.mutate();
   };
 
-  const getStatusIcon = (listedCount: number) => {
+  const getSummaryStatusIcon = (listedCount: number) => {
     if (listedCount === 0) return <CheckCircle size={24} color={Colors.success} />;
     if (listedCount <= 3) return <AlertTriangle size={24} color={Colors.warning} />;
     return <XCircle size={24} color={Colors.error} />;
   };
 
-  const getStatusText = (listedCount: number) => {
-    if (listedCount === 0) return 'No listings detected on checked blacklists.';
-    if (listedCount === 1) return 'Listed on 1 blacklist.';
+  const getSummaryStatusClass = (listedCount: number) => {
+    if (listedCount === 0) return "success";
+    if (listedCount <= 3) return "warning";
+    return "error";
+  };
+
+  const getSummaryStatusText = (listedCount: number) => {
+    if (listedCount === 0) return "No listings detected on checked blacklists.";
+    if (listedCount === 1) return "Listed on 1 blacklist.";
     return `Listed on ${listedCount} blacklists.`;
+  };
+
+  const getBadgeStyles = (listed: boolean) => {
+    if (!listed) {
+      return {
+        container: [styles.badge, styles.badgeSuccess],
+        label: "OK",
+      };
+    }
+    return {
+      container: [styles.badge, styles.badgeError],
+      label: "LISTED",
+    };
   };
 
   useEffect(() => {
     if (isFocused && hasEverFocused) {
-      setTarget('');
-      setMode('auto');
+      setTarget("");
+      setMode("auto");
       setShowModePicker(false);
       setResult(null);
       checkSpam.reset();
@@ -127,8 +149,7 @@ export default function SpamCheckerScreen() {
               autoCorrect={false}
             />
             <Text style={styles.hint}>
-              Enter the sending IP address of your mailserver or the domain you want to
-              check
+              Enter the sending IP address of your mailserver or the domain you want to check.
             </Text>
           </View>
 
@@ -153,7 +174,7 @@ export default function SpamCheckerScreen() {
                       mode === option.value && styles.pickerOptionSelected,
                     ]}
                     onPress={() => {
-                      setMode(option.value);
+                      setMode(option.value as "auto" | "ip" | "domain");
                       setShowModePicker(false);
                     }}
                   >
@@ -170,7 +191,7 @@ export default function SpamCheckerScreen() {
               </View>
             )}
             <Text style={styles.hint}>
-              Auto detect tries to determine if the input is an IP address or a domain
+              Auto detect tries to determine if the input is an IP address or a domain.
             </Text>
           </View>
 
@@ -190,77 +211,88 @@ export default function SpamCheckerScreen() {
         {result && (
           <>
             <View style={styles.summaryCard}>
-              <Text style={styles.summaryTitle}>Blacklist Summary</Text>
+              <View style={styles.summaryHeader}>
+                <Text style={styles.summaryTitle}>Blacklist Summary</Text>
+              </View>
               <View
                 style={[
                   styles.statusBadge,
-                  result.listed_count === 0
-                    ? styles.statusSuccess
-                    : result.listed_count <= 3
-                    ? styles.statusWarning
-                    : styles.statusError,
+                  getSummaryStatusClass(result.listed_count) === "success" &&
+                    styles.statusSuccess,
+                  getSummaryStatusClass(result.listed_count) === "warning" &&
+                    styles.statusWarning,
+                  getSummaryStatusClass(result.listed_count) === "error" &&
+                    styles.statusError,
                 ]}
               >
-                {getStatusIcon(result.listed_count)}
+                {getSummaryStatusIcon(result.listed_count)}
                 <Text style={styles.statusBadgeText}>
-                  {getStatusText(result.listed_count)}
+                  {getSummaryStatusText(result.listed_count)}
                 </Text>
               </View>
               <Text style={styles.summaryDescription}>
-                Checked {result.total_lists} DNSBL/RBL providers for{' '}
+                Checked {result.total_lists} DNSBL/RBL providers for{" "}
                 <Text style={styles.boldText}>{result.checked_value}</Text>.
               </Text>
             </View>
 
             <View style={styles.resultsSection}>
               <Text style={styles.resultsTitle}>DNSBL / Blacklist Results</Text>
-              {result.results.map((item, index) => (
-                <View key={index} style={styles.resultCard}>
-                  <View style={styles.resultHeader}>
-                    <View style={styles.resultInfo}>
-                      <Text style={styles.resultTitle}>{item.name}</Text>
-                      <Text style={styles.resultProvider}>{item.host}</Text>
-                    </View>
-                    <View
-                      style={[
-                        styles.badge,
-                        item.listed ? styles.badgeError : styles.badgeSuccess,
-                      ]}
-                    >
-                      <Text style={styles.badgeText}>
-                        {item.listed ? 'LISTED' : 'OK'}
-                      </Text>
-                    </View>
-                  </View>
+              {Array.isArray(result.results) && result.results.length > 0 ? (
+                result.results.map((item, index) => {
+                  const badge = getBadgeStyles(item.listed);
+                  const reasonText = item.reason
+                    ? item.reason
+                    : item.listed
+                    ? "Listed without provided reason."
+                    : "Not listed on this blacklist.";
+                  const responseText = item.response || "N/A";
+                  const urlText = item.list_url || "N/A";
 
+                  return (
+                    <View key={index} style={styles.resultCard}>
+                      <View style={styles.resultHeader}>
+                        <View style={styles.resultInfo}>
+                          <Text style={styles.resultTitle}>{item.name}</Text>
+                          <Text style={styles.resultProvider}>{item.host}</Text>
+                        </View>
+                        <View style={badge.container}>
+                          <Text style={styles.badgeText}>{badge.label}</Text>
+                        </View>
+                      </View>
+
+                      <View style={styles.resultContent}>
+                        <Text style={styles.resultText}>
+                          <Text style={styles.boldText}>Status:</Text> {badge.label}
+                        </Text>
+                        <Text style={styles.resultText}>
+                          <Text style={styles.boldText}>Host:</Text> {item.host}
+                        </Text>
+                        <Text style={styles.resultText}>
+                          <Text style={styles.boldText}>Response:</Text> {responseText}
+                        </Text>
+                        <Text style={styles.resultText}>
+                          <Text style={styles.boldText}>Reason:</Text> {reasonText}
+                        </Text>
+                        <Text style={styles.resultText}>
+                          <Text style={styles.boldText}>More info:</Text> {urlText}
+                        </Text>
+                      </View>
+                    </View>
+                  );
+                })
+              ) : (
+                <View style={styles.resultCard}>
+                  <View style={styles.resultHeader}>
+                    <Text style={styles.resultTitle}>No Data</Text>
+                  </View>
                   <View style={styles.resultContent}>
                     <Text style={styles.resultText}>
-                      <Text style={styles.boldText}>Status:</Text>{' '}
-                      {item.listed ? 'LISTED' : 'OK'}
+                      No blacklist data available for this query.
                     </Text>
-                    <Text style={styles.resultText}>
-                      <Text style={styles.boldText}>Host:</Text> {item.host}
-                    </Text>
-                    {item.response && (
-                      <Text style={styles.resultText}>
-                        <Text style={styles.boldText}>Response:</Text> {item.response}
-                      </Text>
-                    )}
-                    <Text style={styles.resultText}>
-                      <Text style={styles.boldText}>Reason:</Text>{' '}
-                      {item.reason ||
-                        (item.listed
-                          ? 'Listed without provided reason.'
-                          : 'Not listed on this blacklist.')}
-                    </Text>
-                    {item.list_url && (
-                      <Text style={styles.resultText}>
-                        <Text style={styles.boldText}>More info:</Text> {item.list_url}
-                      </Text>
-                    )}
                   </View>
                 </View>
-              ))}
+              )}
             </View>
           </>
         )}
@@ -270,7 +302,7 @@ export default function SpamCheckerScreen() {
             <Text style={styles.errorText}>
               {checkSpam.error instanceof Error
                 ? checkSpam.error.message
-                : 'Failed to perform spam/blacklist check. Please try again.'}
+                : "Failed to perform spam/blacklist check. Please try again later."}
             </Text>
           </View>
         )}
@@ -295,7 +327,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
-    fontWeight: '800' as const,
+    fontWeight: "800" as const,
     color: Colors.text,
     marginBottom: 8,
   },
@@ -317,7 +349,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    fontWeight: '600' as const,
+    fontWeight: "600" as const,
     color: Colors.text,
     marginBottom: 8,
   },
@@ -352,7 +384,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
     borderRadius: 8,
     marginTop: 8,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   pickerOption: {
     padding: 12,
@@ -360,7 +392,7 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.border,
   },
   pickerOptionSelected: {
-    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+    backgroundColor: "rgba(59, 130, 246, 0.1)",
   },
   pickerOptionText: {
     fontSize: 14,
@@ -368,21 +400,21 @@ const styles = StyleSheet.create({
   },
   pickerOptionTextSelected: {
     color: Colors.primary,
-    fontWeight: '600' as const,
+    fontWeight: "600" as const,
   },
   button: {
     backgroundColor: Colors.primary,
     borderRadius: 8,
     padding: 16,
-    alignItems: 'center',
+    alignItems: "center",
   },
   buttonDisabled: {
     opacity: 0.6,
   },
   buttonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: '600' as const,
+    fontWeight: "600" as const,
   },
   summaryCard: {
     backgroundColor: Colors.cardBg,
@@ -392,20 +424,24 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
     marginBottom: 20,
   },
+  summaryHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
   summaryTitle: {
     fontSize: 20,
-    fontWeight: '700' as const,
+    fontWeight: "700" as const,
     color: Colors.text,
-    marginBottom: 16,
   },
   statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     padding: 16,
     borderRadius: 50,
     borderWidth: 1,
     gap: 12,
-    marginBottom: 16,
+    marginBottom: 12,
   },
   statusSuccess: {
     backgroundColor: Colors.successBg,
@@ -421,7 +457,7 @@ const styles = StyleSheet.create({
   },
   statusBadgeText: {
     fontSize: 16,
-    fontWeight: '600' as const,
+    fontWeight: "600" as const,
     color: Colors.text,
     flex: 1,
   },
@@ -431,7 +467,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   boldText: {
-    fontWeight: '600' as const,
+    fontWeight: "600" as const,
     color: Colors.text,
   },
   resultsSection: {
@@ -439,7 +475,7 @@ const styles = StyleSheet.create({
   },
   resultsTitle: {
     fontSize: 24,
-    fontWeight: '700' as const,
+    fontWeight: "700" as const,
     color: Colors.text,
     marginBottom: 16,
   },
@@ -452,9 +488,9 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   resultHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
     marginBottom: 12,
   },
   resultInfo: {
@@ -462,7 +498,7 @@ const styles = StyleSheet.create({
   },
   resultTitle: {
     fontSize: 16,
-    fontWeight: '600' as const,
+    fontWeight: "600" as const,
     color: Colors.text,
     marginBottom: 4,
   },
@@ -486,7 +522,7 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     fontSize: 12,
-    fontWeight: '600' as const,
+    fontWeight: "600" as const,
     color: Colors.text,
   },
   resultContent: {
@@ -501,7 +537,7 @@ const styles = StyleSheet.create({
     color: Colors.text,
     lineHeight: 20,
     marginBottom: 4,
-    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+    fontFamily: Platform.OS === "ios" ? "Courier" : "monospace",
   },
   errorCard: {
     backgroundColor: Colors.errorBg,

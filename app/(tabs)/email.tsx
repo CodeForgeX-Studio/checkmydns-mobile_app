@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,50 +8,50 @@ import {
   StyleSheet,
   ActivityIndicator,
   Platform,
-} from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useMutation } from '@tanstack/react-query';
-import { useIsFocused } from '@react-navigation/native';
-import { CheckCircle, XCircle, AlertTriangle } from 'lucide-react-native';
-import Colors from '@/constants/colors';
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useMutation } from "@tanstack/react-query";
+import { useIsFocused } from "@react-navigation/native";
+import { CheckCircle, XCircle, AlertTriangle } from "lucide-react-native";
+import Colors from "@/constants/colors";
 
 interface EmailCheckResult {
   success: boolean;
   mxValid: boolean;
   disposable: boolean;
   deliverable: boolean;
-  spf?: string | null;
-  dmarc?: string | null;
-  dkim?: string | null;
-  mx?: string | null;
-  ptr?: string | null;
-  bimi?: string | null;
-  googleverification?: string | null;
+  spf: string | null;
+  dmarc: string | null;
+  dkim: string | null;
+  mx: string | null;
+  ptr: string | null;
+  bimi: string | null;
+  google_verification: string | null;
 }
 
 export default function EmailCheckerScreen() {
   const insets = useSafeAreaInsets();
   const isFocused = useIsFocused();
   const [hasEverFocused, setHasEverFocused] = useState(false);
-  const [domain, setDomain] = useState('');
-  const [dkimSelector, setDkimSelector] = useState('');
+  const [domain, setDomain] = useState("");
+  const [dkimSelector, setDkimSelector] = useState("");
   const [result, setResult] = useState<EmailCheckResult | null>(null);
 
   const checkEmail = useMutation({
     mutationFn: async () => {
       const formData = new FormData();
-      formData.append('domain', domain);
+      formData.append("domain", domain);
       if (dkimSelector.trim()) {
-        formData.append('dkimSelector', dkimSelector);
+        formData.append("dkimSelector", dkimSelector);
       }
 
-      const response = await fetch('https://checkmydns.online/api/email-check', {
-        method: 'POST',
+      const response = await fetch("https://checkmydns.online/api/email-check", {
+        method: "POST",
         body: formData,
       });
 
       if (!response.ok) {
-        throw new Error('Failed to check email host');
+        throw new Error("Failed to check email configuration");
       }
 
       return response.json();
@@ -63,7 +63,7 @@ export default function EmailCheckerScreen() {
 
   const handleCheck = () => {
     if (!domain.trim()) {
-      alert('Please enter a domain name');
+      alert("Please enter a domain name");
       return;
     }
     setResult(null);
@@ -71,35 +71,37 @@ export default function EmailCheckerScreen() {
   };
 
   const getStatusIcon = (value?: string | null) => {
-    const text = (value ?? '').toString().toLowerCase();
+    const text = (value ?? "").toString().toLowerCase();
     const isMissing =
       !text ||
-      text.includes('missing') ||
-      text.includes('not found') ||
-      text.includes('invalid') ||
-      text.includes('not verified');
-
+      text.includes("missing") ||
+      text.includes("not found") ||
+      text.includes("invalid") ||
+      text.includes("not verified");
     if (isMissing) return <XCircle size={20} color={Colors.error} />;
     return <CheckCircle size={20} color={Colors.success} />;
   };
 
-  const normalize = (v: unknown) => (v == null ? '' : String(v));
+  const normalize = (v: unknown) => (v == null ? "" : String(v));
 
   const checks =
     result && [
-      { title: 'SPF Record', value: normalize(result.spf) },
-      { title: 'DMARC Record', value: normalize(result.dmarc) },
-      { title: 'DKIM Record', value: normalize(result.dkim) },
-      { title: 'MX Records', value: normalize(result.mx) },
-      { title: 'PTR Record', value: normalize(result.ptr) },
-      { title: 'BIMI Record', value: normalize(result.bimi) },
-      { title: 'Google Verification', value: normalize(result.googleverification) },
+      { title: "SPF Record", value: normalize(result.spf) },
+      { title: "DMARC Record", value: normalize(result.dmarc) },
+      { title: "DKIM Record", value: normalize(result.dkim) },
+      { title: "MX Records", value: normalize(result.mx) },
+      { title: "PTR Record", value: normalize(result.ptr) },
+      { title: "BIMI Record", value: normalize(result.bimi) },
+      {
+        title: "Google Verification",
+        value: normalize(result.google_verification),
+      },
     ];
 
   useEffect(() => {
     if (isFocused && hasEverFocused) {
-      setDomain('');
-      setDkimSelector('');
+      setDomain("");
+      setDkimSelector("");
       setResult(null);
       checkEmail.reset();
     }
@@ -184,12 +186,12 @@ export default function EmailCheckerScreen() {
                 )}
                 <Text style={styles.statusBadgeText}>
                   {result.deliverable
-                    ? 'Email is deliverable'
+                    ? "Email is deliverable"
                     : result.disposable
-                    ? 'Disposable email domain detected'
+                    ? "Disposable email domain detected"
                     : result.mxValid
-                    ? 'Email may not be deliverable'
-                    : 'No valid MX records found'}
+                    ? "Email may not be deliverable"
+                    : "No valid MX records found"}
                 </Text>
               </View>
             </View>
@@ -205,7 +207,7 @@ export default function EmailCheckerScreen() {
                     </View>
                     <View style={styles.resultContent}>
                       <Text style={styles.resultText}>
-                        {check.value || 'No data'}
+                        {check.value || "No data"}
                       </Text>
                     </View>
                   </View>
@@ -242,7 +244,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
-    fontWeight: '800' as const,
+    fontWeight: "800" as const,
     color: Colors.text,
     marginBottom: 8,
   },
@@ -264,7 +266,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    fontWeight: '600' as const,
+    fontWeight: "600" as const,
     color: Colors.text,
     marginBottom: 8,
   },
@@ -286,15 +288,15 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     borderRadius: 8,
     padding: 16,
-    alignItems: 'center',
+    alignItems: "center",
   },
   buttonDisabled: {
     opacity: 0.6,
   },
   buttonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: '600' as const,
+    fontWeight: "600" as const,
   },
   summaryCard: {
     backgroundColor: Colors.cardBg,
@@ -306,13 +308,13 @@ const styles = StyleSheet.create({
   },
   summaryTitle: {
     fontSize: 20,
-    fontWeight: '700' as const,
+    fontWeight: "700" as const,
     color: Colors.text,
     marginBottom: 16,
   },
   statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     padding: 16,
     borderRadius: 50,
     borderWidth: 1,
@@ -332,7 +334,7 @@ const styles = StyleSheet.create({
   },
   statusBadgeText: {
     fontSize: 16,
-    fontWeight: '600' as const,
+    fontWeight: "600" as const,
     color: Colors.text,
     flex: 1,
   },
@@ -341,7 +343,7 @@ const styles = StyleSheet.create({
   },
   resultsTitle: {
     fontSize: 24,
-    fontWeight: '700' as const,
+    fontWeight: "700" as const,
     color: Colors.text,
     marginBottom: 16,
   },
@@ -354,14 +356,14 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   resultHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 12,
   },
   resultTitle: {
     fontSize: 16,
-    fontWeight: '600' as const,
+    fontWeight: "600" as const,
     color: Colors.text,
   },
   resultContent: {
@@ -374,7 +376,7 @@ const styles = StyleSheet.create({
   resultText: {
     fontSize: 13,
     color: Colors.text,
-    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+    fontFamily: Platform.OS === "ios" ? "Courier" : "monospace",
   },
   errorCard: {
     backgroundColor: Colors.errorBg,
