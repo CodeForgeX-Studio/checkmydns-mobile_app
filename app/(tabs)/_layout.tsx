@@ -43,7 +43,7 @@ function CustomTabBar({ state, descriptors, navigation }) {
       >
         {state.routes.map((route, index) => {
           const { options } = descriptors[route.key];
-          if (route.name === "app-info" || route.name === "security") return null;
+          if (route.name === "about" || route.name === "security") return null;
           const label = options.title ?? route.name;
           const isFocused = state.index === index;
           const onPress = () => {
@@ -82,9 +82,9 @@ function CustomTabBar({ state, descriptors, navigation }) {
         </TouchableOpacity>
 
         {state.routes.map((route) => {
-          if (route.name === "app-info") {
+          if (route.name === "about") {
             const { options } = descriptors[route.key];
-            const index = state.routes.findIndex((r) => r.name === "app-info");
+            const index = state.routes.findIndex((r) => r.name === "about");
             const isFocused = state.index === index;
             const onPress = () => {
               navigation.navigate(route.name as never);
@@ -236,7 +236,7 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
-        name="app-info"
+        name="about"
         options={{
           title: "About",
           tabBarIcon: ({ color }) => <Info size={24} color={color} />,

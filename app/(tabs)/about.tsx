@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   View,
   Text,
@@ -6,16 +6,16 @@ import {
   ScrollView,
   StyleSheet,
   Linking,
-} from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   DollarSign,
   FileText,
   Globe,
   ExternalLink,
   Code,
-} from 'lucide-react-native';
-import Colors from '@/constants/colors';
+} from "lucide-react-native";
+import Colors from "@/constants/colors";
 
 export default function MoreScreen() {
   const insets = useSafeAreaInsets();
@@ -29,7 +29,7 @@ export default function MoreScreen() {
         alert(`Cannot open URL: ${url}`);
       }
     } catch {
-      alert('Failed to open URL');
+      alert("Failed to open URL");
     }
   };
 
@@ -37,10 +37,28 @@ export default function MoreScreen() {
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-          <Text style={styles.title}>About the app</Text>
+          <Text style={styles.title}>About Check My DNS</Text>
           <Text style={styles.subtitle}>
-            Access pricing, documentation, and learn more about Check My DNS
+            Learn what this app does, where to find documentation, and who is behind it.
           </Text>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>App overview</Text>
+
+          <View style={styles.aboutCard}>
+            <View style={styles.logoContainer}>
+              <Code size={40} color={Colors.primary} />
+            </View>
+            <Text style={styles.appName}>Check My DNS</Text>
+            <Text style={styles.appVersion}>Version 1.0.1</Text>
+            <Text style={styles.aboutDescription}>
+              Check My DNS is a professional DNS lookup and email security validation tool.
+              Use it to perform global DNS checks, validate email authentication, run
+              comprehensive security audits, and monitor blacklist status for your domains
+              and mail servers.
+            </Text>
+          </View>
         </View>
 
         <View style={styles.section}>
@@ -48,7 +66,7 @@ export default function MoreScreen() {
 
           <TouchableOpacity
             style={styles.menuItem}
-            onPress={() => openURL('https://checkmydns.online/pricing')}
+            onPress={() => openURL("https://checkmydns.online/pricing")}
           >
             <View style={styles.menuIcon}>
               <DollarSign size={24} color={Colors.primary} />
@@ -56,7 +74,7 @@ export default function MoreScreen() {
             <View style={styles.menuContent}>
               <Text style={styles.menuTitle}>Pricing</Text>
               <Text style={styles.menuDescription}>
-                View pricing plans and features
+                View available plans and included features.
               </Text>
             </View>
             <ExternalLink size={20} color={Colors.textMuted} />
@@ -64,7 +82,9 @@ export default function MoreScreen() {
 
           <TouchableOpacity
             style={styles.menuItem}
-            onPress={() => openURL('https://docs.codeforgex.studio/checkmydns/overview')}
+            onPress={() =>
+              openURL("https://docs.codeforgex.studio/checkmydns/overview")
+            }
           >
             <View style={styles.menuIcon}>
               <FileText size={24} color={Colors.primary} />
@@ -72,7 +92,7 @@ export default function MoreScreen() {
             <View style={styles.menuContent}>
               <Text style={styles.menuTitle}>Documentation</Text>
               <Text style={styles.menuDescription}>
-                API documentation and integration guides
+                API reference, integration examples, and usage guides.
               </Text>
             </View>
             <ExternalLink size={20} color={Colors.textMuted} />
@@ -80,15 +100,15 @@ export default function MoreScreen() {
 
           <TouchableOpacity
             style={styles.menuItem}
-            onPress={() => openURL('https://checkmydns.online')}
+            onPress={() => openURL("https://checkmydns.online")}
           >
             <View style={styles.menuIcon}>
               <Globe size={24} color={Colors.primary} />
             </View>
             <View style={styles.menuContent}>
-              <Text style={styles.menuTitle}>Visit Website</Text>
+              <Text style={styles.menuTitle}>Web dashboard</Text>
               <Text style={styles.menuDescription}>
-                Go to checkmydns.online
+                Open the full web version at checkmydns.online.
               </Text>
             </View>
             <ExternalLink size={20} color={Colors.textMuted} />
@@ -96,32 +116,21 @@ export default function MoreScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>About</Text>
-
-          <View style={styles.aboutCard}>
-            <View style={styles.logoContainer}>
-              <Code size={48} color={Colors.primary} />
-            </View>
-            <Text style={styles.appName}>Check My DNS</Text>
-            <Text style={styles.appVersion}>Version 1.0.1</Text>
-            <Text style={styles.aboutDescription}>
-              Professional DNS lookup and email security validation tool. Check DNS
-              records globally, validate email configuration, run comprehensive security
-              audits, and monitor blacklist status.
-            </Text>
-          </View>
+          <Text style={styles.sectionTitle}>Publisher</Text>
 
           <View style={styles.brandCard}>
             <View style={styles.brandHeader}>
-              <Code size={32} color={Colors.primary} />
+              <Code size={28} color={Colors.primary} />
               <Text style={styles.brandTitle}>CodeForgeX Studio</Text>
             </View>
             <Text style={styles.brandDescription}>
-              Check My DNS is owned and powered by CodeForgeX Studio
+              Check My DNS is built, owned, and maintained by CodeForgeX Studio, a
+              developer‑focused studio specialising in network tooling and security‑oriented
+              utilities.
             </Text>
             <TouchableOpacity
               style={styles.brandButton}
-              onPress={() => openURL('https://codeforgex.studio')}
+              onPress={() => openURL("https://codeforgex.studio")}
             >
               <Text style={styles.brandButtonText}>Visit CodeForgeX Studio</Text>
               <ExternalLink size={16} color="#fff" />
@@ -130,8 +139,10 @@ export default function MoreScreen() {
         </View>
 
         <View style={styles.footer}>
-          <Text style={styles.footerText}>© {new Date().getFullYear()} CodeForgeX Studio</Text>
-          <Text style={styles.footerText}>All rights reserved</Text>
+          <Text style={styles.footerText}>
+            © {new Date().getFullYear()} CodeForgeX Studio
+          </Text>
+          <Text style={styles.footerText}>All rights reserved.</Text>
         </View>
       </ScrollView>
     </View>
@@ -153,137 +164,136 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   title: {
-    fontSize: 32,
-    fontWeight: '800' as const,
+    fontSize: 28,
+    fontWeight: "800" as const,
     color: Colors.text,
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 14,
     color: Colors.textSecondary,
-    lineHeight: 24,
+    lineHeight: 20,
   },
   section: {
-    marginBottom: 32,
+    marginBottom: 28,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: '700' as const,
+    fontSize: 18,
+    fontWeight: "700" as const,
     color: Colors.text,
-    marginBottom: 16,
+    marginBottom: 12,
   },
   menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: Colors.cardBg,
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
     borderColor: Colors.border,
-    marginBottom: 12,
+    marginBottom: 10,
   },
   menuIcon: {
-    width: 48,
-    height: 48,
+    width: 44,
+    height: 44,
     borderRadius: 10,
-    backgroundColor: 'rgba(59, 130, 246, 0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 16,
+    backgroundColor: "rgba(59, 130, 246, 0.1)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 14,
   },
   menuContent: {
     flex: 1,
   },
   menuTitle: {
-    fontSize: 16,
-    fontWeight: '600' as const,
+    fontSize: 15,
+    fontWeight: "600" as const,
     color: Colors.text,
-    marginBottom: 4,
+    marginBottom: 2,
   },
   menuDescription: {
-    fontSize: 14,
+    fontSize: 13,
     color: Colors.textSecondary,
   },
   aboutCard: {
     backgroundColor: Colors.cardBg,
     borderRadius: 12,
-    padding: 24,
+    padding: 20,
     borderWidth: 1,
     borderColor: Colors.border,
-    alignItems: 'center',
-    marginBottom: 16,
+    alignItems: "flex-start",
   },
   logoContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 20,
-    backgroundColor: 'rgba(59, 130, 246, 0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    backgroundColor: "rgba(59, 130, 246, 0.1)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 12,
   },
   appName: {
-    fontSize: 24,
-    fontWeight: '700' as const,
+    fontSize: 20,
+    fontWeight: "700" as const,
     color: Colors.text,
-    marginBottom: 4,
+    marginBottom: 2,
   },
   appVersion: {
-    fontSize: 14,
+    fontSize: 12,
     color: Colors.textMuted,
-    marginBottom: 16,
+    marginBottom: 10,
   },
   aboutDescription: {
-    fontSize: 14,
+    fontSize: 13,
     color: Colors.textSecondary,
-    textAlign: 'center',
     lineHeight: 20,
   },
   brandCard: {
     backgroundColor: Colors.cardBg,
     borderRadius: 12,
-    padding: 24,
+    padding: 20,
     borderWidth: 1,
     borderColor: Colors.border,
   },
   brandHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-    gap: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+    gap: 10,
   },
   brandTitle: {
-    fontSize: 20,
-    fontWeight: '700' as const,
+    fontSize: 18,
+    fontWeight: "700" as const,
     color: Colors.text,
   },
   brandDescription: {
-    fontSize: 14,
+    fontSize: 13,
     color: Colors.textSecondary,
     lineHeight: 20,
-    marginBottom: 16,
+    marginBottom: 14,
   },
   brandButton: {
     backgroundColor: Colors.primary,
     borderRadius: 8,
-    padding: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: 8,
   },
   brandButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600' as const,
+    color: "#fff",
+    fontSize: 15,
+    fontWeight: "600" as const,
   },
   footer: {
-    alignItems: 'center',
-    paddingVertical: 24,
+    alignItems: "center",
+    paddingVertical: 20,
   },
   footerText: {
-    fontSize: 12,
+    fontSize: 11,
     color: Colors.textMuted,
-    marginBottom: 4,
+    marginBottom: 2,
   },
 });
