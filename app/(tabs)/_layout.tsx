@@ -77,7 +77,7 @@ function CustomTabBar({ state, descriptors, navigation }) {
         >
           <SlidersHorizontal color={Colors.textMuted} size={24} />
           <Text style={{ color: Colors.textMuted, fontSize: 12 }}>
-            More Tools
+            More
           </Text>
         </TouchableOpacity>
 
@@ -105,7 +105,7 @@ function CustomTabBar({ state, descriptors, navigation }) {
                     fontSize: 12,
                   }}
                 >
-                  App Info
+                  About
                 </Text>
               </TouchableOpacity>
             );
@@ -155,7 +155,7 @@ function CustomTabBar({ state, descriptors, navigation }) {
                   color: Colors.text,
                 }}
               >
-                More Tools
+                More
               </Text>
               <TouchableOpacity onPress={() => setToolsVisible(false)}>
                 <X size={20} color={Colors.textMuted} />
@@ -238,7 +238,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="app-info"
         options={{
-          title: "App Info",
+          title: "About",
           tabBarIcon: ({ color }) => <Info size={24} color={color} />,
         }}
       />
