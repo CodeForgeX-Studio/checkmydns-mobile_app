@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useMutation } from '@tanstack/react-query';
+import { useIsFocused } from '@react-navigation/native';
 import { CheckCircle, AlertTriangle, XCircle } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 
@@ -38,6 +39,8 @@ interface SecurityCheckResult {
 
 export default function SecurityCheckerScreen() {
   const insets = useSafeAreaInsets();
+  const isFocused = useIsFocused();
+  const [hasEverFocused, setHasEverFocused] = useState(false);
   const [domain, setDomain] = useState('');
   const [dkimSelector, setDkimSelector] = useState('');
   const [result, setResult] = useState<SecurityCheckResult | null>(null);
@@ -76,11 +79,22 @@ export default function SecurityCheckerScreen() {
   };
 
   const getStatusIcon = (level: string) => {
-    if (level === 'High')
-      return <CheckCircle size={24} color={Colors.success} />;
+    if (level === 'High') return <CheckCircle size={24} color={Colors.success} />;
     if (level === 'Low') return <XCircle size={24} color={Colors.error} />;
     return <AlertTriangle size={24} color={Colors.warning} />;
   };
+
+  useEffect(() => {
+    if (isFocused && hasEverFocused) {
+      setDomain('');
+      setDkimSelector('');
+      setResult(null);
+      checkSecurity.reset();
+    }
+    if (isFocused && !hasEverFocused) {
+      setHasEverFocused(true);
+    }
+  }, [isFocused]);
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -187,9 +201,7 @@ export default function SecurityCheckerScreen() {
                       </Text>
                     ))
                   ) : (
-                    <Text style={styles.listItem}>
-                      No critical issues detected.
-                    </Text>
+                    <Text style={styles.listItem}>No critical issues detected.</Text>
                   )}
                 </View>
               </View>
@@ -284,8 +296,8 @@ export default function SecurityCheckerScreen() {
                         </Text>
                         {result.details.SSL.expiry_days !== undefined && (
                           <Text style={styles.listItem}>
-                            • SSL Expiry: ~{Math.round(result.details.SSL.expiry_days)} days
-                            remaining
+                            • SSL Expiry: ~
+                            {Math.round(result.details.SSL.expiry_days)} days remaining
                           </Text>
                         )}
                         {result.details.HSTS && (

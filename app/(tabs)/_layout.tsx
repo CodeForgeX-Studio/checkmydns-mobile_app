@@ -20,7 +20,7 @@ import React, { useState } from "react";
 import Colors from "@/constants/colors";
 
 const tools = [
-  { key: "spam", label: "Spam Checker", icon: AlertCircle },
+  { key: "security", label: "Security Checker", icon: Shield },
 ];
 
 function CustomTabBar({ state, descriptors, navigation }) {
@@ -43,7 +43,7 @@ function CustomTabBar({ state, descriptors, navigation }) {
       >
         {state.routes.map((route, index) => {
           const { options } = descriptors[route.key];
-          if (route.name === "app-info" || route.name === "spam") return null;
+          if (route.name === "app-info" || route.name === "security") return null;
           const label = options.title ?? route.name;
           const isFocused = state.index === index;
           const onPress = () => {
@@ -228,10 +228,10 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
-        name="security"
+        name="spam"
         options={{
-          title: "Security",
-          tabBarIcon: ({ color }) => <Shield size={24} color={color} />,
+          title: "Spam",
+          tabBarIcon: ({ color }) => <AlertCircle size={24} color={color} />,
         }}
       />
 
@@ -244,10 +244,10 @@ export default function TabLayout() {
       />
       
       <Tabs.Screen
-        name="spam"
+        name="Security"
         options={{
           href: null,
-          title: "Spam",
+          title: "Security",
         }}
       />
     </Tabs>

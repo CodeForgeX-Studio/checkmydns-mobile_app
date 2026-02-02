@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useMutation } from '@tanstack/react-query';
+import { useIsFocused } from '@react-navigation/native';
 import { CheckCircle, XCircle, AlertTriangle } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 
@@ -39,6 +40,8 @@ interface SpamCheckResult {
 
 export default function SpamCheckerScreen() {
   const insets = useSafeAreaInsets();
+  const isFocused = useIsFocused();
+  const [hasEverFocused, setHasEverFocused] = useState(false);
   const [target, setTarget] = useState('');
   const [mode, setMode] = useState('auto');
   const [showModePicker, setShowModePicker] = useState(false);
@@ -88,6 +91,19 @@ export default function SpamCheckerScreen() {
     return `Listed on ${listedCount} blacklists.`;
   };
 
+  useEffect(() => {
+    if (isFocused && hasEverFocused) {
+      setTarget('');
+      setMode('auto');
+      setShowModePicker(false);
+      setResult(null);
+      checkSpam.reset();
+    }
+    if (isFocused && !hasEverFocused) {
+      setHasEverFocused(true);
+    }
+  }, [isFocused]);
+
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
@@ -111,7 +127,8 @@ export default function SpamCheckerScreen() {
               autoCorrect={false}
             />
             <Text style={styles.hint}>
-              Enter the sending IP address of your mailserver or the domain you want to check
+              Enter the sending IP address of your mailserver or the domain you want to
+              check
             </Text>
           </View>
 

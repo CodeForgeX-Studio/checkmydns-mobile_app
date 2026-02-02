@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useMutation } from '@tanstack/react-query';
+import { useIsFocused } from '@react-navigation/native';
 import { CheckCircle, XCircle, AlertTriangle } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 
@@ -19,17 +20,19 @@ interface EmailCheckResult {
   mxValid: boolean;
   disposable: boolean;
   deliverable: boolean;
-  spf: string;
-  dmarc: string;
-  dkim: string;
-  mx: string;
-  ptr: string;
-  bimi: string;
-  google_verification: string;
+  spf?: string | null;
+  dmarc?: string | null;
+  dkim?: string | null;
+  mx?: string | null;
+  ptr?: string | null;
+  bimi?: string | null;
+  googleverification?: string | null;
 }
 
 export default function EmailCheckerScreen() {
   const insets = useSafeAreaInsets();
+  const isFocused = useIsFocused();
+  const [hasEverFocused, setHasEverFocused] = useState(false);
   const [domain, setDomain] = useState('');
   const [dkimSelector, setDkimSelector] = useState('');
   const [result, setResult] = useState<EmailCheckResult | null>(null);
@@ -53,7 +56,7 @@ export default function EmailCheckerScreen() {
 
       return response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: (data: EmailCheckResult) => {
       setResult(data);
     },
   });
@@ -67,30 +70,43 @@ export default function EmailCheckerScreen() {
     checkEmail.mutate();
   };
 
-  const getStatusIcon = (value: string) => {
+  const getStatusIcon = (value?: string | null) => {
+    const text = (value ?? '').toString().toLowerCase();
     const isMissing =
-      value.toLowerCase().includes('missing') ||
-      value.toLowerCase().includes('not found') ||
-      value.toLowerCase().includes('invalid') ||
-      value.toLowerCase().includes('not verified');
+      !text ||
+      text.includes('missing') ||
+      text.includes('not found') ||
+      text.includes('invalid') ||
+      text.includes('not verified');
 
-    if (isMissing) {
-      return <XCircle size={20} color={Colors.error} />;
-    }
+    if (isMissing) return <XCircle size={20} color={Colors.error} />;
     return <CheckCircle size={20} color={Colors.success} />;
   };
 
-  const checks = result
-    ? [
-        { title: 'SPF Record', value: result.spf },
-        { title: 'DMARC Record', value: result.dmarc },
-        { title: 'DKIM Record', value: result.dkim },
-        { title: 'MX Records', value: result.mx },
-        { title: 'PTR Record', value: result.ptr },
-        { title: 'BIMI Record', value: result.bimi },
-        { title: 'Google Verification', value: result.google_verification },
-      ]
-    : [];
+  const normalize = (v: unknown) => (v == null ? '' : String(v));
+
+  const checks =
+    result && [
+      { title: 'SPF Record', value: normalize(result.spf) },
+      { title: 'DMARC Record', value: normalize(result.dmarc) },
+      { title: 'DKIM Record', value: normalize(result.dkim) },
+      { title: 'MX Records', value: normalize(result.mx) },
+      { title: 'PTR Record', value: normalize(result.ptr) },
+      { title: 'BIMI Record', value: normalize(result.bimi) },
+      { title: 'Google Verification', value: normalize(result.googleverification) },
+    ];
+
+  useEffect(() => {
+    if (isFocused && hasEverFocused) {
+      setDomain('');
+      setDkimSelector('');
+      setResult(null);
+      checkEmail.reset();
+    }
+    if (isFocused && !hasEverFocused) {
+      setHasEverFocused(true);
+    }
+  }, [isFocused]);
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -98,7 +114,7 @@ export default function EmailCheckerScreen() {
         <View style={styles.header}>
           <Text style={styles.title}>Email Checker</Text>
           <Text style={styles.subtitle}>
-            Validate email domain configuration including SPF, DMARC, DKIM & more
+            Validate email domain configuration including SPF, DMARC, DKIM and more
           </Text>
         </View>
 
@@ -127,7 +143,9 @@ export default function EmailCheckerScreen() {
               autoCapitalize="none"
               autoCorrect={false}
             />
-            <Text style={styles.hint}>Common selectors: default, google, k1, selector1</Text>
+            <Text style={styles.hint}>
+              Common selectors: default, google, k1, selector1
+            </Text>
           </View>
 
           <TouchableOpacity
@@ -178,17 +196,20 @@ export default function EmailCheckerScreen() {
 
             <View style={styles.resultsSection}>
               <Text style={styles.resultsTitle}>Email Configuration Results</Text>
-              {checks.map((check, index) => (
-                <View key={index} style={styles.resultCard}>
-                  <View style={styles.resultHeader}>
-                    <Text style={styles.resultTitle}>{check.title}</Text>
-                    {getStatusIcon(check.value)}
+              {checks &&
+                checks.map((check, index) => (
+                  <View key={index} style={styles.resultCard}>
+                    <View style={styles.resultHeader}>
+                      <Text style={styles.resultTitle}>{check.title}</Text>
+                      {getStatusIcon(check.value)}
+                    </View>
+                    <View style={styles.resultContent}>
+                      <Text style={styles.resultText}>
+                        {check.value || 'No data'}
+                      </Text>
+                    </View>
                   </View>
-                  <View style={styles.resultContent}>
-                    <Text style={styles.resultText}>{check.value}</Text>
-                  </View>
-                </View>
-              ))}
+                ))}
             </View>
           </>
         )}

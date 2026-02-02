@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useMutation } from '@tanstack/react-query';
+import { useIsFocused } from '@react-navigation/native';
 import Colors from '@/constants/colors';
 
 const RECORD_TYPES = [
@@ -36,6 +37,8 @@ interface DNSResult {
 
 export default function DNSCheckerScreen() {
   const insets = useSafeAreaInsets();
+  const isFocused = useIsFocused();
+  const [hasEverFocused, setHasEverFocused] = useState(false);
   const [domain, setDomain] = useState('');
   const [recordType, setRecordType] = useState('A');
   const [showTypePicker, setShowTypePicker] = useState(false);
@@ -71,6 +74,19 @@ export default function DNSCheckerScreen() {
     setResults([]);
     checkDNS.mutate();
   };
+
+  useEffect(() => {
+    if (isFocused && hasEverFocused) {
+      setDomain('');
+      setRecordType('A');
+      setShowTypePicker(false);
+      setResults([]);
+      checkDNS.reset();
+    }
+    if (isFocused && !hasEverFocused) {
+      setHasEverFocused(true);
+    }
+  }, [isFocused]);
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
