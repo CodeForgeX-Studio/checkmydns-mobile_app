@@ -158,24 +158,16 @@ export default function MoreScreen() {
               comprehensive security audits, and monitor blacklist status for your domains
               and mail servers.
             </Text>
+
+            <TouchableOpacity
+              style={styles.reviewButton}
+              onPress={handleLeaveReview}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.reviewButtonText}>Leave a review</Text>
+              <ExternalLink size={18} color="#fff" />
+            </TouchableOpacity>
           </View>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Reviews</Text>
-
-          <TouchableOpacity
-            style={styles.reviewButton}
-            onPress={handleLeaveReview}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.reviewButtonText}>Leave a review</Text>
-            <ExternalLink size={18} color="#fff" />
-          </TouchableOpacity>
-
-          <Text style={styles.reviewNote}>
-            Reviews will be available once the app is live on the official stores for your device.
-          </Text>
         </View>
 
         <View style={styles.section}>
@@ -332,13 +324,6 @@ export default function MoreScreen() {
             <Text style={styles.modalMessage}>
               Please try again later once Check My DNS is live on the official app store for your device.
             </Text>
-
-            <TouchableOpacity
-              style={styles.modalButtonPrimary}
-              onPress={closeReviewModal}
-            >
-              <Text style={styles.modalButtonPrimaryText}>Close</Text>
-            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -427,7 +412,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(59, 130, 246, 0.1)",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 12,
+    marginBottom: 10,
   },
   appName: {
     fontSize: 20,
@@ -438,12 +423,13 @@ const styles = StyleSheet.create({
   appVersion: {
     fontSize: 12,
     color: Colors.textMuted,
-    marginBottom: 10,
+    marginBottom: 8,
   },
   aboutDescription: {
     fontSize: 13,
     color: Colors.textSecondary,
     lineHeight: 20,
+    marginBottom: 10,
   },
   brandCard: {
     backgroundColor: Colors.cardBg,
@@ -592,6 +578,8 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
     gap: 8,
+    alignSelf: "stretch",
+    marginTop: 8,
   },
   reviewButtonText: {
     color: "#fff",
