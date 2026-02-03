@@ -45,7 +45,7 @@ export default function EmailCheckerScreen() {
         formData.append("dkimSelector", dkimSelector);
       }
 
-      const response = await fetch("https://checkmydns.online/api/email-check", {
+      const response = await fetch("https://mobile.api.checkmydns.online/v1.0/email-check", {
         method: "POST",
         body: formData,
       });

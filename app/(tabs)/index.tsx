@@ -85,7 +85,7 @@ export default function DNSCheckerScreen() {
       formData.append("domain", domain);
       formData.append("recordType", recordType);
 
-      const response = await fetch("https://checkmydns.online/api/dns-check", {
+      const response = await fetch("https://mobile.api.checkmydns.online/v1.0/dns-check", {
         method: "POST",
         body: formData,
       });
