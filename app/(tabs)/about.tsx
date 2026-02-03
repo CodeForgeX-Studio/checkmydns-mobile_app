@@ -113,10 +113,10 @@ export default function MoreScreen() {
     const osName = Device.osName;
     let url: string | null = null;
 
-    if (osName === "Android") {
-      url = googlePlayReviewUrl || null;
-    } else if (osName === "iOS" || osName === "iPadOS") {
+    if (osName === "iOS" || osName === "iPadOS") {
       url = appStoreReviewUrl || null;
+    } else if (osName === "Android" || "google" || "xiaomi") {
+      url = googlePlayReviewUrl || null;
     } else {
       url = null;
     }
