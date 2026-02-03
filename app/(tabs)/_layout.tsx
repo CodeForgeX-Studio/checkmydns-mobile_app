@@ -17,6 +17,7 @@ import {
   Pressable,
 } from "react-native";
 import React, { useState } from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 
 const tools = [
@@ -25,6 +26,7 @@ const tools = [
 
 function CustomTabBar({ state, descriptors, navigation }) {
   const [toolsVisible, setToolsVisible] = useState(false);
+  const insets = useSafeAreaInsets();
 
   const handleToolPress = (toolKey: string) => {
     setToolsVisible(false);
@@ -39,6 +41,8 @@ function CustomTabBar({ state, descriptors, navigation }) {
           backgroundColor: Colors.cardBg,
           borderTopColor: Colors.border,
           borderTopWidth: 1,
+          paddingBottom: insets.bottom > 0 ? insets.bottom : 8,
+          paddingTop: 8,
         }}
       >
         {state.routes.map((route, index) => {
@@ -53,7 +57,7 @@ function CustomTabBar({ state, descriptors, navigation }) {
             <TouchableOpacity
               key={route.key}
               onPress={onPress}
-              style={{ flex: 1, padding: 8, alignItems: "center" }}
+              style={{ flex: 1, alignItems: "center" }}
             >
               {options.tabBarIcon?.({
                 color: isFocused ? Colors.primary : Colors.textMuted,
@@ -73,7 +77,7 @@ function CustomTabBar({ state, descriptors, navigation }) {
 
         <TouchableOpacity
           onPress={() => setToolsVisible(true)}
-          style={{ flex: 1, padding: 8, alignItems: "center" }}
+          style={{ flex: 1, alignItems: "center" }}
         >
           <SlidersHorizontal color={Colors.textMuted} size={24} />
           <Text style={{ color: Colors.textMuted, fontSize: 12 }}>
@@ -93,7 +97,7 @@ function CustomTabBar({ state, descriptors, navigation }) {
               <TouchableOpacity
                 key={route.key}
                 onPress={onPress}
-                style={{ flex: 1, padding: 8, alignItems: "center" }}
+                style={{ flex: 1, alignItems: "center" }}
               >
                 {options.tabBarIcon?.({
                   color: isFocused ? Colors.primary : Colors.textMuted,
@@ -133,7 +137,7 @@ function CustomTabBar({ state, descriptors, navigation }) {
               backgroundColor: Colors.cardBg,
               paddingTop: 12,
               paddingHorizontal: 16,
-              paddingBottom: 16,
+              paddingBottom: insets.bottom + 16,
               borderTopLeftRadius: 16,
               borderTopRightRadius: 16,
               maxHeight: "60%",
@@ -165,7 +169,7 @@ function CustomTabBar({ state, descriptors, navigation }) {
             <FlatList
               data={tools}
               keyExtractor={(item) => item.key}
-              showsVerticalScrollIndicator
+              showsVerticalScrollIndicator={false}
               renderItem={({ item }) => {
                 const Icon = item.icon;
                 return (
@@ -174,7 +178,7 @@ function CustomTabBar({ state, descriptors, navigation }) {
                     style={{
                       flexDirection: "row",
                       alignItems: "center",
-                      paddingVertical: 10,
+                      paddingVertical: 12,
                     }}
                   >
                     {Icon && (
@@ -204,11 +208,6 @@ export default function TabLayout() {
       tabBar={(props) => <CustomTabBar {...props} />}
       screenOptions={{
         headerShown: false,
-        tabBarStyle: {
-          backgroundColor: Colors.cardBg,
-          borderTopColor: Colors.border,
-          borderTopWidth: 1,
-        },
       }}
     >
       <Tabs.Screen
@@ -218,7 +217,6 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <Globe size={24} color={color} />,
         }}
       />
-
       <Tabs.Screen
         name="email"
         options={{
@@ -226,7 +224,6 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <Mail size={24} color={color} />,
         }}
       />
-
       <Tabs.Screen
         name="spam"
         options={{
@@ -234,7 +231,6 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <AlertCircle size={24} color={color} />,
         }}
       />
-
       <Tabs.Screen
         name="about"
         options={{
@@ -242,7 +238,6 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <Info size={24} color={color} />,
         }}
       />
-      
       <Tabs.Screen
         name="security"
         options={{
