@@ -17,12 +17,16 @@ import {
   ExternalLink,
   Code,
 } from "lucide-react-native";
+import * as Device from "expo-device";
 import Colors from "@/constants/colors";
 
 type PendingLinkState = {
   url: string | null;
   domain: string | null;
 };
+
+const googlePlayReviewUrl = "";
+const appStoreReviewUrl = "";
 
 export default function MoreScreen() {
   const insets = useSafeAreaInsets();
@@ -33,6 +37,7 @@ export default function MoreScreen() {
   });
   const [modalVisible, setModalVisible] = useState(false);
   const [trustDomainChecked, setTrustDomainChecked] = useState(false);
+  const [reviewModalVisible, setReviewModalVisible] = useState(false);
 
   const extractDomain = (url: string): string | null => {
     try {
@@ -104,6 +109,30 @@ export default function MoreScreen() {
     return pendingLink.domain;
   }, [pendingLink.domain]);
 
+  const handleLeaveReview = async () => {
+    const osName = Device.osName;
+    let url: string | null = null;
+
+    if (osName === "Android") {
+      url = googlePlayReviewUrl || null;
+    } else if (osName === "iOS" || osName === "iPadOS") {
+      url = appStoreReviewUrl || null;
+    } else {
+      url = null;
+    }
+
+    if (!url) {
+      setReviewModalVisible(true);
+      return;
+    }
+
+    await openURL(url);
+  };
+
+  const closeReviewModal = () => {
+    setReviewModalVisible(false);
+  };
+
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
@@ -130,6 +159,23 @@ export default function MoreScreen() {
               and mail servers.
             </Text>
           </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Reviews</Text>
+
+          <TouchableOpacity
+            style={styles.reviewButton}
+            onPress={handleLeaveReview}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.reviewButtonText}>Leave a review</Text>
+            <ExternalLink size={18} color="#fff" />
+          </TouchableOpacity>
+
+          <Text style={styles.reviewNote}>
+            Reviews will be available once the app is live on the official stores for your device.
+          </Text>
         </View>
 
         <View style={styles.section}>
@@ -260,6 +306,38 @@ export default function MoreScreen() {
               onPress={handleConfirmOpen}
             >
               <Text style={styles.modalButtonPrimaryText}>Open link</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={reviewModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={closeReviewModal}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalHeaderRow}>
+              <Text style={styles.modalTitle}>Reviews not available yet</Text>
+              <TouchableOpacity onPress={closeReviewModal} style={styles.closeIconButton}>
+                <Text style={styles.closeIconText}>×</Text>
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.modalMessage}>
+              Reviews for this app are not available yet for your device platform.
+            </Text>
+            <Text style={styles.modalMessage}>
+              Please try again later once Check My DNS is live on the official app store for your device.
+            </Text>
+
+            <TouchableOpacity
+              style={styles.modalButtonPrimary}
+              onPress={closeReviewModal}
+            >
+              <Text style={styles.modalButtonPrimaryText}>Close</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -504,5 +582,25 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: Colors.textSecondary,
     flex: 1,
+  },
+  reviewButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: Colors.primary,
+    borderRadius: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    gap: 8,
+  },
+  reviewButtonText: {
+    color: "#fff",
+    fontSize: 15,
+    fontWeight: "600" as const,
+  },
+  reviewNote: {
+    marginTop: 8,
+    fontSize: 12,
+    color: Colors.textSecondary,
   },
 });
