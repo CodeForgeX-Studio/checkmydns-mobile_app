@@ -7,6 +7,7 @@ import {
   AlertCircle,
   Info,
   X,
+  WifiOff,
 } from "lucide-react-native";
 import {
   View,
@@ -16,8 +17,9 @@ import {
   FlatList,
   Pressable,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import * as Network from "expo-network";
 import Colors from "@/constants/colors";
 
 const tools = [
@@ -202,49 +204,186 @@ function CustomTabBar({ state, descriptors, navigation }) {
   );
 }
 
+function NetworkMonitor() {
+  const [isOffline, setIsOffline] = useState(false);
+  const [isRetrying, setIsRetrying] = useState(false);
+  const insets = useSafeAreaInsets();
+
+  useEffect(() => {
+    const checkConnection = async () => {
+      try {
+        const state = await Network.getNetworkStateAsync();
+        const offline = !state.isConnected || state.isInternetReachable === false;
+        setIsOffline(offline);
+      } catch (error) {
+        setIsOffline(true);
+      }
+    };
+
+    checkConnection();
+
+    const intervalId = setInterval(() => {
+      checkConnection();
+    }, 1000);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, []);
+
+  const handleRetry = async () => {
+    setIsRetrying(true);
+    try {
+      const state = await Network.getNetworkStateAsync();
+      if (state.isConnected && state.isInternetReachable !== false) {
+        setIsOffline(false);
+      }
+    } catch (error) {
+      console.error("Network check failed:", error);
+    } finally {
+      setTimeout(() => setIsRetrying(false), 1000);
+    }
+  };
+
+  return (
+    <Modal
+      visible={isOffline}
+      transparent
+      animationType="fade"
+      onRequestClose={() => {}}
+    >
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "rgba(0,0,0,0.85)",
+          paddingHorizontal: 24,
+        }}
+      >
+        <View
+          style={{
+            backgroundColor: Colors.cardBg,
+            borderRadius: 16,
+            padding: 24,
+            width: "100%",
+            maxWidth: 340,
+            alignItems: "center",
+          }}
+        >
+          <View
+            style={{
+              width: 64,
+              height: 64,
+              borderRadius: 32,
+              backgroundColor: Colors.primary + "20",
+              justifyContent: "center",
+              alignItems: "center",
+              marginBottom: 16,
+            }}
+          >
+            <WifiOff size={32} color={Colors.primary} />
+          </View>
+
+          <Text
+            style={{
+              fontSize: 20,
+              fontWeight: "600",
+              color: Colors.text,
+              marginBottom: 8,
+              textAlign: "center",
+            }}
+          >
+            No Internet Connection
+          </Text>
+
+          <Text
+            style={{
+              fontSize: 14,
+              color: Colors.textMuted,
+              textAlign: "center",
+              marginBottom: 24,
+              lineHeight: 20,
+            }}
+          >
+            Check My DNS needs an active internet connection to function. Please check your network settings and try again.
+          </Text>
+
+          <TouchableOpacity
+            onPress={handleRetry}
+            disabled={isRetrying}
+            style={{
+              backgroundColor: Colors.primary,
+              paddingVertical: 12,
+              paddingHorizontal: 32,
+              borderRadius: 8,
+              width: "100%",
+              alignItems: "center",
+              opacity: isRetrying ? 0.6 : 1,
+            }}
+          >
+            <Text
+              style={{
+                color: "#ffffff",
+                fontSize: 16,
+                fontWeight: "600",
+              }}
+            >
+              {isRetrying ? "Checking..." : "Retry"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
 export default function TabLayout() {
   return (
-    <Tabs
-      tabBar={(props) => <CustomTabBar {...props} />}
-      screenOptions={{
-        headerShown: false,
-      }}
-    >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: "DNS",
-          tabBarIcon: ({ color }) => <Globe size={24} color={color} />,
+    <>
+      <NetworkMonitor />
+      <Tabs
+        tabBar={(props) => <CustomTabBar {...props} />}
+        screenOptions={{
+          headerShown: false,
         }}
-      />
-      <Tabs.Screen
-        name="email"
-        options={{
-          title: "Email",
-          tabBarIcon: ({ color }) => <Mail size={24} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="spam"
-        options={{
-          title: "Spam",
-          tabBarIcon: ({ color }) => <AlertCircle size={24} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="about"
-        options={{
-          title: "About",
-          tabBarIcon: ({ color }) => <Info size={24} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="security"
-        options={{
-          href: null,
-          title: "Security",
-        }}
-      />
-    </Tabs>
+      >
+        <Tabs.Screen
+          name="index"
+          options={{
+            title: "DNS",
+            tabBarIcon: ({ color }) => <Globe size={24} color={color} />,
+          }}
+        />
+        <Tabs.Screen
+          name="email"
+          options={{
+            title: "Email",
+            tabBarIcon: ({ color }) => <Mail size={24} color={color} />,
+          }}
+        />
+        <Tabs.Screen
+          name="spam"
+          options={{
+            title: "Spam",
+            tabBarIcon: ({ color }) => <AlertCircle size={24} color={color} />,
+          }}
+        />
+        <Tabs.Screen
+          name="about"
+          options={{
+            title: "About",
+            tabBarIcon: ({ color }) => <Info size={24} color={color} />,
+          }}
+        />
+        <Tabs.Screen
+          name="security"
+          options={{
+            href: null,
+            title: "Security",
+          }}
+        />
+      </Tabs>
+    </>
   );
 }
