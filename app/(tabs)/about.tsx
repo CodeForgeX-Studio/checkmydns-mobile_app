@@ -16,6 +16,7 @@ import {
   Globe,
   ExternalLink,
   Code,
+  Activity,
 } from "lucide-react-native";
 import * as Device from "expo-device";
 import Colors from "@/constants/colors";
@@ -218,6 +219,22 @@ export default function MoreScreen() {
               <Text style={styles.menuTitle}>Web dashboard</Text>
               <Text style={styles.menuDescription}>
                 Open the full web version at checkmydns.online.
+              </Text>
+            </View>
+            <ExternalLink size={20} color={Colors.textMuted} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => openURL("https://status.codeforgex.studio")}
+          >
+            <View style={styles.menuIcon}>
+              <Activity size={24} color={Colors.primary} />
+            </View>
+            <View style={styles.menuContent}>
+              <Text style={styles.menuTitle}>Status page</Text>
+              <Text style={styles.menuDescription}>
+                Check service status and uptime for Check My DNS and other CodeForgeX Studio services.
               </Text>
             </View>
             <ExternalLink size={20} color={Colors.textMuted} />
