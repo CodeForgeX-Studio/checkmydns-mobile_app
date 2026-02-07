@@ -192,7 +192,7 @@ export default function MoreScreen() {
           <TouchableOpacity
             style={styles.menuItem}
             onPress={() =>
-              openURL("https://docs.codeforgex.studio/checkmydns/overview")
+              openURL("https://docs.checkmydns.online")
             }
           >
             <View style={styles.menuIcon}>
