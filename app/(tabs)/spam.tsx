@@ -55,7 +55,7 @@ export default function SpamCheckerScreen() {
       formData.append("target", target);
       formData.append("mode", mode);
 
-      const response = await fetch("https://mobile.api.checkmydns.online/v1.0/spam-check", {
+      const response = await fetch("https://api.checkmydns.online/v1.0/spam-check", {
         method: "POST",
         body: formData,
       });

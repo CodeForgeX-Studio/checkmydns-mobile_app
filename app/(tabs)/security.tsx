@@ -113,7 +113,7 @@ export default function SecurityCheckerScreen() {
         formData.append("dkim_selector", dkimSelector);
       }
 
-      const response = await fetch("https://mobile.api.checkmydns.online/v1.0/security-check", {
+      const response = await fetch("https://api.checkmydns.online/v1.0/security-check", {
         method: "POST",
         body: formData,
       });
